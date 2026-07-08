@@ -1,88 +1,89 @@
 const express = require("express");
-const pino = require("pino");
-
-const logger = pino();
 
 const app = express();
 
 const PORT = 3000;
 
+// Home
 app.get("/", (req, res) => {
-
-    logger.info("Home endpoint called");
-
-    res.send("OTEL Demo Running");
+    res.send("🚀 OpenTelemetry Demo Application");
 });
 
+// Users API
 app.get("/users", async (req, res) => {
-
-    logger.info("Users endpoint");
-
-    await sleep(500);
-
-    res.json({
-        users: [
-            "John",
-            "Alice",
-            "Bob"
-        ]
-    });
-
-});
-
-app.get("/orders", async (req, res) => {
-
-    logger.info("Orders endpoint");
 
     await sleep(1000);
 
     res.json({
-        orders: [
-            1001,
-            1002,
-            1003
+        status: "success",
+        users: [
+            {
+                id: 1,
+                name: "John"
+            },
+            {
+                id: 2,
+                name: "Alice"
+            },
+            {
+                id: 3,
+                name: "Bob"
+            }
         ]
     });
 
 });
 
-app.get("/payment", async (req, res) => {
-
-    logger.info("Payment endpoint");
+// Orders API
+app.get("/orders", async (req, res) => {
 
     await sleep(2000);
 
-    const random = Math.random();
-
-    if (random > 0.5) {
-
-        logger.error("Payment Failed");
-
-        return res.status(500).json({
-            message: "Payment Failed"
-        });
-    }
-
-    logger.info("Payment Success");
-
     res.json({
-        message: "Payment Successful"
+        status: "success",
+        orders: [
+            {
+                id: 101,
+                amount: 500
+            },
+            {
+                id: 102,
+                amount: 850
+            }
+        ]
     });
+
+});
+
+// Error API
+app.get("/error", async (req, res) => {
+
+    await sleep(500);
+
+    throw new Error("Something went wrong!");
 
 });
 
 function sleep(ms) {
 
-    return new Promise(resolve => {
-
-        setTimeout(resolve, ms);
-
-    });
+    return new Promise(resolve => setTimeout(resolve, ms));
 
 }
 
+// Global Error Handler
+app.use((err, req, res, next) => {
+
+    console.error(err.message);
+
+    res.status(500).json({
+        status: "error",
+        message: err.message
+    });
+
+});
+
 app.listen(PORT, () => {
 
-    console.log(`Application Running on ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 
 });
